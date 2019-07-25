@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+credentials_to_mongodb.R
+readme.html
+index_files/
+index.html
+current_ip.txt
