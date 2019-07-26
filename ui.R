@@ -8,6 +8,8 @@ fluidPage(
                 sidebarPanel(
                   selectizeInput(inputId="choix_app",label="Application à analyser",choices=apps,multiple=T,
                                  options = list(placeholder = "Nom de l'app",plugins= list('remove_button'),maxItems=1)),
+                  # conditionalPanel("input.graphes === 'nb_visits' && input.choix_app !== null",
+                  #                  actionButton("refresh_pop","Tirer 10 autres sessions",icon=icon("dice"))),
                   conditionalPanel("input.graphes === 'analysis_sessions'",
                                    uiOutput("choix_variables"))
                 ),
@@ -15,7 +17,8 @@ fluidPage(
                                  mainPanel(
                                    navbarPage(title="Graphiques",id="graphes",selected = "nb_visits",
                                                 tabPanel(title="Nombre de visites",value="nb_visits",
-                                                         dygraphOutput("nb_visiteurs_quotidiens")),
+                                                         dygraphOutput("nb_visiteurs_quotidiens"),
+                                                         plotlyOutput("sankey_input_valeur")),
                                                 tabPanel(title="Analyse des visiteurs",value="analysis_sessions",
                                                          div(class="col-lg-6 col-md-6 col-sm-12 col-xs-12",
                                                              plotlyOutput("plot_stats_sessions")),

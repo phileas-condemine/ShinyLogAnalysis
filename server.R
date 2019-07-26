@@ -38,6 +38,70 @@ function(input, output,session) {
     data
   })
   
+  
+  output$sankey_input_valeur=renderPlotly({
+
+    data=shinylogs()
+    # run=input$refresh_pop
+    # ids=sample(unique(data$id),10)   
+    # sub_data=data[id %in% ids]
+    link_input_val = data[,.(value=.N),by=c("input","valeur")]
+    setorder(link_input_val,-value)
+    link_input_val = head(link_input_val,30)
+    
+    
+    nodes_input=data.table(label=unique(link_input_val$input))
+    nodes_input$color="blue"
+    nodes_input$id=0:(nrow(nodes_input)-1)
+    nodes_valeur=data.table(label=unique(link_input_val$valeur))
+    nodes_valeur$color="red"
+    nodes_valeur$id=0:(nrow(nodes_valeur)-1)+nrow(nodes_input)
+    nodes=rbind(nodes_input,nodes_valeur)
+
+    nrow(link_input_val)
+    link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="input",by.y="label")
+    nrow(link_input_val)
+    setnames(link_input_val,"id","source")
+    link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="valeur",by.y="label")
+    nrow(link_input_val)
+    setnames(link_input_val,"id","target")
+    
+    p <- plot_ly(
+      type = "sankey",
+      orientation = "h",
+      
+      node = list(
+        label = nodes$label,
+        color = nodes$color,
+        pad = 15,
+        thickness = 20,
+        line = list(
+          color = "black",
+          width = 0.5
+        )
+      ),
+      
+      link = list(
+        source = link_input_val$source,
+        target = link_input_val$target,
+        value =  link_input_val$value
+      )
+    ) %>% 
+      layout(
+        title = "Basic Sankey Diagram",
+        font = list(
+          size = 10
+        )
+      )
+    
+    p
+    
+  })
+  
+  
+  
+  
+  
   colors_reac=reactive({
     data=shinylogs()
     inputs=unique(data$input)
@@ -127,7 +191,7 @@ function(input, output,session) {
     one_click=event_data("plotly_click",source = "plot_stats")
     req(one_click)
     one_id=one_click$key
-    sub_data = data[id==one_id]
+    # sub_data = data[id==one_id]
     
     sub_data = shinylogs()[id==one_id]
     
@@ -171,7 +235,7 @@ function(input, output,session) {
     nb_events=uniqueN(sub_data$event)
     sliderInput("interaction_number",sprintf("Commencer au n-ème événement (fenêtre de %s événements)",window_width),
                 min = 1,max=max(1,nb_events-window_width),value=2,step=1,width = "100%", 
-                animate = animationOptions(interval = 1000, loop = TRUE))
+                animate = animationOptions(interval = 1000, loop = F))
   })
   
 
@@ -195,10 +259,10 @@ function(input, output,session) {
     tiny_data[event %in% my_events[5] & variable %in% "time"]$size <- 16
     
     annotation_data=sub_data[event %in% my_events[1:2] & variable%in%"time"]
-    annotation_data$ax=c(80,80)
-    superposed=ifelse(annotation_data$input[1] == annotation_data$input[2],-1,1)
-    annotation_data$ay=c(-30*superposed,-30)
-    time_diff=difftime(annotation_data$time[2]-annotation_data$time[1],units = "secs")
+    annotation_data$ax=c(50,200)
+    superposed=ifelse(annotation_data$input[1] == annotation_data$input[2],100,-100)
+    annotation_data$ay=c(superposed,-100)
+    time_diff=difftime(annotation_data$time[2],annotation_data$time[1],units = "secs")
     time_diff=round(as.numeric(time_diff),2)
     annotation_data[1,text:=paste0("Valeur:\n", valeur,"\nEvent n°: ",event)]
     annotation_data[2,text:=paste0("Valeur:\n", valeur,"\nEvent n°: ",event,"\nTimeDiff:",time_diff,"sec")]
