@@ -6,7 +6,7 @@ library(plotly)
 library(lubridate)
 library(htmlwidgets)
 library(dygraphs)
-
+library(forcats)
 apps = c("cartoIndicateurs","distriPensions")
 
 
@@ -20,3 +20,5 @@ dyCrosshair <- function(dygraph,
     options = list(direction = match.arg(direction))
   )
 }
+
+window_width=30

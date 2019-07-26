@@ -1,0 +1,10 @@
+name: shinyLogsAnalyseR_dev
+title:
+username:
+account: drees
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1050985
+bundleId: 2264512
+url: https://drees.shinyapps.io/shinyLogsAnalyseR_dev/
+when: 1564072079.37588
