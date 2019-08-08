@@ -2,8 +2,14 @@
 .Rhistory
 .RData
 .Ruserdata
+rsconnect/
 credentials_to_mongodb.R
 readme.html
 index_files/
 index.html
 current_ip.txt
+re_deploy_shinyServer.R
+check_mongodb.R
+.gitignore
+manifest.txt
+generate_daily_graph.R
