@@ -18,6 +18,19 @@ function(input, output,session) {
       databaseName <- "UX"
       collectionName <- "DistriPens"
     }
+    
+    if (app == apps[3]){
+      options(mongodb = cred)
+      databaseName <- "UX"
+      collectionName <- "Care-M"
+    }
+    
+    if (app == apps[4]){
+      options(mongodb = cred)
+      databaseName <- "UX"
+      collectionName <- "condition_de_vie_des_enfants"
+    }
+    
     db <- mongo(collection = collectionName,
                 url = sprintf(
                   "mongodb+srv://%s:%s@%s/%s",
@@ -38,66 +51,78 @@ function(input, output,session) {
     data
   })
   
-  
-  output$sankey_input_valeur=renderPlotly({
-
+  output$dist_valeurs_input=renderPlotly({
     data=shinylogs()
-    # run=input$refresh_pop
-    # ids=sample(unique(data$id),10)   
-    # sub_data=data[id %in% ids]
-    link_input_val = data[,.(value=.N),by=c("input","valeur")]
-    setorder(link_input_val,-value)
-    link_input_val = head(link_input_val,30)
-    
-    
-    nodes_input=data.table(label=unique(link_input_val$input))
-    nodes_input$color="blue"
-    nodes_input$id=0:(nrow(nodes_input)-1)
-    nodes_valeur=data.table(label=unique(link_input_val$valeur))
-    nodes_valeur$color="red"
-    nodes_valeur$id=0:(nrow(nodes_valeur)-1)+nrow(nodes_input)
-    nodes=rbind(nodes_input,nodes_valeur)
-
-    nrow(link_input_val)
-    link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="input",by.y="label")
-    nrow(link_input_val)
-    setnames(link_input_val,"id","source")
-    link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="valeur",by.y="label")
-    nrow(link_input_val)
-    setnames(link_input_val,"id","target")
-    
-    p <- plot_ly(
-      type = "sankey",
-      orientation = "h",
-      
-      node = list(
-        label = nodes$label,
-        color = nodes$color,
-        pad = 15,
-        thickness = 20,
-        line = list(
-          color = "black",
-          width = 0.5
-        )
-      ),
-      
-      link = list(
-        source = link_input_val$source,
-        target = link_input_val$target,
-        value =  link_input_val$value
-      )
-    ) %>% 
-      layout(
-        title = "Basic Sankey Diagram",
-        font = list(
-          size = 10
-        )
-      )
-    
-    p
+    stats=data[,.(count=.N),by=c("input","valeur")]
+    setorder(stats,-count)
+    stats%>%head(50)%>%
+    plot_ly(x=~input,y=~count,color=~valeur,text=~paste0("Valeur: ",valeur))%>%
+      hide_legend()%>%layout(hovermode = 'compare',title="Nombre de clics sur les 50 modalités préférées",
+                             xaxis=list(title = "Bouton"),yaxis=list(title = "Nombre de clics"))
     
   })
   
+  
+  
+  # output$sankey_input_valeur=renderPlotly({
+  #   
+  #   data=shinylogs()
+  #   # run=input$refresh_pop
+  #   # ids=sample(unique(data$id),10)   
+  #   # sub_data=data[id %in% ids]
+  #   link_input_val = data[,.(value=.N),by=c("input","valeur")]
+  #   setorder(link_input_val,-value)
+  #   link_input_val = head(link_input_val,30)
+  #   
+  #   
+  #   nodes_input=data.table(label=unique(link_input_val$input))
+  #   nodes_input$color="blue"
+  #   nodes_input$id=0:(nrow(nodes_input)-1)
+  #   nodes_valeur=data.table(label=unique(link_input_val$valeur))
+  #   nodes_valeur$color="red"
+  #   nodes_valeur$id=0:(nrow(nodes_valeur)-1)+nrow(nodes_input)
+  #   nodes=rbind(nodes_input,nodes_valeur)
+  #   
+  #   nrow(link_input_val)
+  #   link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="input",by.y="label")
+  #   nrow(link_input_val)
+  #   setnames(link_input_val,"id","source")
+  #   link_input_val = merge(link_input_val,nodes[,c("label","id")],by.x="valeur",by.y="label")
+  #   nrow(link_input_val)
+  #   setnames(link_input_val,"id","target")
+  #   
+  #   p <- plot_ly(
+  #     type = "sankey",
+  #     orientation = "h",
+  #     
+  #     node = list(
+  #       label = nodes$label,
+  #       color = nodes$color,
+  #       pad = 15,
+  #       thickness = 20,
+  #       line = list(
+  #         color = "black",
+  #         width = 0.5
+  #       )
+  #     ),
+  #     
+  #     link = list(
+  #       source = link_input_val$source,
+  #       target = link_input_val$target,
+  #       value =  link_input_val$value
+  #     )
+  #   ) %>% 
+  #     layout(
+  #       title = "30 modalités les plus fréquentes",
+  #       font = list(
+  #         size = 10
+  #       )
+  #     )
+  #   
+  #   p
+  #   
+  # })
+  # 
   
   
   
@@ -148,20 +173,18 @@ function(input, output,session) {
   
   output$choix_variables = renderUI({
     print("render choix des vars")
-    nms=c("Nombre de clics"="nb_click",
-          "Durée de la session"="duration",
-          "Plus longue interruption pendant la session"="pause_longue",
-          "Nombre de boutons manipulés pendant la session"="buttons_div",
-          "Nombre de valeurs de paramètres testées"="choices_div")
+    
     list(selectizeInput("var1","Abscisses",choices=nms,selected=nms[2]),
          selectizeInput("var2","Ordonnées",choices=nms,selected=nms[5]))
   })
   
   output$plot_stats_sessions=renderPlotly({
     print("render plotly stats sessions")
+    nm1=names(which(nms == input$var1))
+    nm2=names(which(nms == input$var2))
     stats_sessions()%>%plot_ly(x=~get(input$var1),y=~get(input$var2),
                                name=~last_input,key=~id,type = "scatter",source = "plot_stats")%>%
-      hide_legend()%>%layout(xaxis = list(title = input$var1), yaxis = list(title = input$var2))
+      hide_legend()%>%layout(xaxis = list(title = nm1), yaxis = list(title = nm2))
   })
   
   
@@ -195,34 +218,47 @@ function(input, output,session) {
     
     sub_data = shinylogs()[id==one_id]
     
+    ##### Focus sur qqBoutons #####
+    req(input$choix_buttons)
+    choix=input$choix_buttons
+    sub_data = sub_data[input%in%choix]
+    
     ##### rleid trick : remove fake updates #####
-    sub_data[,dup:=rleid(valeur),by="input"]
+    sub_data[,dup:=rleid(valeur),by="input"]#plusieurs fois la même modalité consécutivement => doublon
     sub_data=sub_data[,.SD[1],by=.(input,dup)]
     sub_data$dup=NULL
     
     #### add colors and start-end logic #### 
     colors_ <- colors_reac()
     sub_data = merge(sub_data,colors_,by=c("input","valeur"))
-    sub_data = sub_data[,.("next_time"=lead(time),time=time,valeur=valeur,id=id,color=color),by="input"]
-    last_click=max(sub_data$time)+lubridate::seconds(30)
-    sub_data[is.na(next_time), "next_time":=last_click]
-    sub_data$y=factor(sub_data$input,levels=unique(sub_data$input))
+    # sub_data = sub_data[,.("next_time"=lead(time),time=time,valeur=valeur,id=id,color=color),by="input"]
     setorder(sub_data,time)
+    sub_data[,"next_time":=.(lead(time)),by="input"]
+    last_click=max(sub_data$time,na.rm=T)+lubridate::seconds(30)
+    sub_data[is.na(next_time), "next_time":=last_click]
+    setorder(sub_data,time,next_time)
     sub_data$event=1:nrow(sub_data)
     names(sub_data)
-    sub_data=melt.data.table(sub_data,id.vars = c("input","valeur","id","color","y","event"))
+    sub_data=melt.data.table(sub_data,id.vars = c("input","valeur","id","color","event"))
     setnames(sub_data,"value","time")
     # sub_data[,variable:=NULL]
-    setorder(sub_data,time)
-    sub_data$y=forcats::fct_inorder(sub_data$y)
+
     sub_data$size=15
+    setorder(sub_data,time)
+    sub_data$y=factor(sub_data$input,levels=choix)
+    sub_data$y=forcats::fct_inorder(sub_data$y)    
     sub_data
   })
   
   
   output$choix_buttonsUI=renderUI({
-    sub_data = sub_data_buttons()
-    selectizeInput("choix_buttons","Bouttons à observer",choices=unique(sub_data$input),selected=unique(sub_data$input),multiple=T,
+    one_click=event_data("plotly_click",source = "plot_stats")
+    req(one_click)
+    one_id=one_click$key
+    sub_data = shinylogs()[id==one_id]
+    selectizeInput("choix_buttons","Bouttons à observer",
+                   choices=unique(sub_data$input),
+                   selected=unique(sub_data$input),multiple=T,
                    options=list(plugins= list('remove_button')),width="100%")
   })  
   
@@ -234,32 +270,46 @@ function(input, output,session) {
     sub_data = sub_data[input %in% choix]
     nb_events=uniqueN(sub_data$event)
     sliderInput("interaction_number",sprintf("Commencer au n-ème événement (fenêtre de %s événements)",window_width),
-                min = 1,max=max(1,nb_events-window_width),value=2,step=1,width = "100%", 
-                animate = animationOptions(interval = 1000, loop = F))
+                min = 1,max=max(1,nb_events-2),value=2,step=1,width = "100%", 
+                animate = animationOptions(interval = 2000, loop = F))%>%shinyInput_label_embed(
+                  icon("question-circle") %>%
+                    bs_embed_tooltip(title = "Utilisez le clavier (flèches droite-gauche) pour passer à l'événement suivant-précédent.\nL'icône de lecture en bas à droite permet d'enchaîner les événements.\nSi vous ne parvenez plus à arrêter l'animation, changez de session en cliquant dans le graphique ci-dessus.")
+                )
   })
   
-
   
-    output$bouttons_interaction=renderPlotly({
+  
+  output$bouttons_interaction=renderPlotly({
     req(input$interaction_number)
     sub_data = sub_data_buttons()
-    min_date=min(sub_data$time)
-    max_date=max(sub_data$time)
-    choix=input$choix_buttons
-    sub_data = sub_data[input%in%choix]
+    min_date = min(sub_data$time)
+    max_date = max(sub_data$time)
     my_events = unique(sub_data$event)
     my_events = sort(my_events)
-    my_events = my_events[seq(input$interaction_number,input$interaction_number+window_width,1)]
+    my_events = my_events[seq(input$interaction_number,
+                              min(input$interaction_number+window_width,
+                                  length(my_events)),1)]
     
     tiny_data=sub_data[event %in% my_events]
+    
+    time_event1=tiny_data[event %in% my_events[1] & variable %in% "time"]$time
+    annotation_right_left_event1=ifelse(time_event1>mean(c(max_date,min_date)),-1,1)
+    time_event2=tiny_data[event %in% my_events[2] & variable %in% "time"]$time
+    annotation_right_left_event2=ifelse(time_event2>mean(c(max_date,min_date)),-1,1)
+    
+    print("check times")
+    print(min_date)
+    print(min(tiny_data$time))
+    print(min(tiny_data[variable=="time"]$time))
+    print(time_event1)
+    
     tiny_data[event %in% my_events[1] & variable %in% "time"]$size <- 24
     tiny_data[event %in% my_events[2] & variable %in% "time"]$size <- 22
     tiny_data[event %in% my_events[3] & variable %in% "time"]$size <- 20
     tiny_data[event %in% my_events[4] & variable %in% "time"]$size <- 18
     tiny_data[event %in% my_events[5] & variable %in% "time"]$size <- 16
-    
     annotation_data=sub_data[event %in% my_events[1:2] & variable%in%"time"]
-    annotation_data$ax=c(50,200)
+    annotation_data$ax=c(50*annotation_right_left_event1,200*annotation_right_left_event2)
     superposed=ifelse(annotation_data$input[1] == annotation_data$input[2],100,-100)
     annotation_data$ay=c(superposed,-100)
     time_diff=difftime(annotation_data$time[2],annotation_data$time[1],units = "secs")
@@ -269,9 +319,11 @@ function(input, output,session) {
     
     # tiny_data$size[length(tiny_data$size)] <- 20
     setorder(tiny_data,time)
-    plot_ly(data=tiny_data,x=~time,y=~y,color=~color,split = ~event,size = ~size,text=~paste("Bouton: ", input, "<br>",
-                                                                                        "Valeur: ", valeur, "<br>",
-                                                                                        "Temps: ", time),
+    plot_ly(data=tiny_data,x=~time,y=~y,color=~color,split = ~event,size = ~size,text=~paste("Bouton: ", input, 
+                                                                                             "\nValeur: ", valeur, 
+                                                                                             "\nTemps: ", time, 
+                                                                                             "\nEvent n°: ",event,
+                                                                                             "\nVariable: ",variable),
             type="scatter",mode="lines+markers",line = list(width=10),marker=list(line=list(width=15),symbol=8))%>%
       hide_legend()%>%layout(hovermode= "closest",xaxis = list(title = "Temps", showspikes= T, spikemode= "toaxis", spikesnap= "cursor+data",
                                                                range = c(min_date,max_date)),

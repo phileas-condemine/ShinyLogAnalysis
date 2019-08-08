@@ -17,18 +17,24 @@ fluidPage(
                                  mainPanel(
                                    navbarPage(title="Graphiques",id="graphes",selected = "nb_visits",
                                                 tabPanel(title="Nombre de visites",value="nb_visits",
-                                                         dygraphOutput("nb_visiteurs_quotidiens"),
-                                                         plotlyOutput("sankey_input_valeur")),
-                                                tabPanel(title="Analyse des visiteurs",value="analysis_sessions",
+                                                         dygraphOutput("nb_visiteurs_quotidiens")),
+                                              tabPanel(title="Boutons & Valeurs",
+                                                       value="input_valeur",
+                                                       # plotlyOutput("sankey_input_valeur")
+                                                       withSpinner(plotlyOutput("dist_valeurs_input"))
+                                              ),
+                                                tabPanel(title="Analyse des visites",value="analysis_sessions",
                                                          div(class="col-lg-6 col-md-6 col-sm-12 col-xs-12",
-                                                             plotlyOutput("plot_stats_sessions")),
+                                                             withSpinner(plotlyOutput("plot_stats_sessions"))),
                                                          div(class="col-lg-6 col-md-6 col-sm-12 col-xs-12",
                                                              dygraphOutput("activity_dygraph")),
                                                          div(class="col-lg-12 col-md-12 col-sm-12 col-xs-12",
                                                              uiOutput("choix_buttonsUI"),uiOutput("interaction_numberUI")),                                                         
                                                          div(class="col-lg-12 col-md-12 col-sm-12 col-xs-12",
                                                              plotlyOutput("bouttons_interaction"))                                                         
-                                                         )
+                                                         )                                           
+
+
                                    )
                                  )
                 )

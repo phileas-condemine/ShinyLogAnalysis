@@ -7,7 +7,9 @@ library(lubridate)
 library(htmlwidgets)
 library(dygraphs)
 library(forcats)
-apps = c("cartoIndicateurs","distriPensions")
+library(shinycssloaders)
+library(bsplus)
+apps = c("cartoIndicateurs","distriPensions","Care-M","condition_de_vie_des_enfants")
 
 
 dyCrosshair <- function(dygraph, 
@@ -22,3 +24,12 @@ dyCrosshair <- function(dygraph,
 }
 
 window_width=30
+
+palettes= c("BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral")
+
+
+nms=c("Nombre de clics"="nb_click",
+      "Durée de la session"="duration",
+      "Plus longue interruption pendant la session"="pause_longue",
+      "Nombre de boutons manipulés pendant la session"="buttons_div",
+      "Nombre de valeurs de paramètres testées"="choices_div")
