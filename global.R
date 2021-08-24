@@ -9,7 +9,13 @@ library(dygraphs)
 library(forcats)
 library(shinycssloaders)
 library(bsplus)
-apps = c("cartoIndicateurs","distriPensions","Care-M","condition_de_vie_des_enfants")
+apps = c("cartoIndicateurs",
+         "distriPensions",
+         "Care-M",
+         "condition_de_vie_des_enfants",
+         "dico-snds",
+         "landing_page",
+         "demographie_ps")
 
 
 dyCrosshair <- function(dygraph, 

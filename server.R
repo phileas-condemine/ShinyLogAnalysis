@@ -31,6 +31,24 @@ function(input, output,session) {
       collectionName <- "condition_de_vie_des_enfants"
     }
     
+    if (app == apps[5]){
+      options(mongodb = cred)
+      databaseName <- "UX"
+      collectionName <- "DicoSNDS"
+    }
+    
+    if (app == apps[6]){
+      options(mongodb = cred)
+      databaseName <- "UX"
+      collectionName <- "LandingPage"
+    }
+    
+    if (app == apps[7]){
+      options(mongodb = cred)
+      databaseName <- "UX"
+      collectionName <- "demographie_ps"
+    }
+    
     db <- mongo(collection = collectionName,
                 url = sprintf(
                   "mongodb+srv://%s:%s@%s/%s",
@@ -40,9 +58,12 @@ function(input, output,session) {
                   databaseName))
     data=db$find("{}")
     print("get data from mongodb")
-    data=data.table(data)
+    data=data.table(data,fill=T)
+    data = data[,c("time","id","input","valeur")]
+    data = na.omit(data)
     print(nrow(data))
     data=data[,.SD[.N],by=c("time","input","id")]
+    
     print(nrow(data))
     data[,"nb_click":=.(.N-1),by="id"]
     data=data[nb_click>0]
@@ -164,7 +185,14 @@ function(input, output,session) {
   
   output$nb_visiteurs_quotidiens=renderDygraph({
     print("render dygraph")
-    dg <- shinylogs()[,list(nb_visiteurs=uniqueN(id)),by=as.Date(time)] %>%
+    dg <- shinylogs()
+    dg[,date_d := as.Date(time)]
+    dg <- dg[,list(nb_visiteurs=uniqueN(id)),by=date_d]
+    alldates <- data.table(date_d=seq.Date(min(dg$date_d), max(dg$date_d), by="day"))
+    # merge
+    dg <- merge(dg, alldates, by="date_d", all=TRUE)
+    dg[is.na(nb_visiteurs),nb_visiteurs:=0]
+    dg <- dg[,c("date_d","nb_visiteurs")] %>%
       dygraphs::dygraph(
         # main="Nombre de visites sur le site DistriPensions"
       )
