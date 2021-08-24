@@ -1,10 +1,10 @@
-Pour mettre en place le cronjob : 
+Une app Shiny pour explorer les logs de plusieurs Shiny de la DREES.
 
-> sudo crontab -e
+Les logs sont stockées dans bases MongoDB Cloud.
 
-` 10 14  * * * drees /home/drees/shinyapps_logs/cronjob.sh`
+Les logs à enregistrer sont définies à la main dans le code de chaque app.
 
-- Pour ajouter clef SSH sur github pour ne pas avoir à se réidentifier à chaque fois : 
-https://help.github.com/en/enterprise/2.15/user/articles/adding-a-new-ssh-key-to-your-github-account
-- Sur la VM, s'identifier (gitconfig) une fois avec github en sudo.
-
+Plusieurs fonctionnalités sont proposées : 
+- nombre de connexions par jour
+- décompte général des actions (boutons et modalités) utilisées
+- analyse des actions pour une session donnée
