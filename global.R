@@ -9,13 +9,13 @@ library(dygraphs)
 library(forcats)
 library(shinycssloaders)
 library(bsplus)
-apps = c("cartoIndicateurs",
-         "distriPensions",
-         "Care-M",
-         "condition_de_vie_des_enfants",
-         "dico-snds",
-         "landing_page",
-         "demographie_ps")
+apps = c("cartoIndicateurs",#drees-indicateurs-sante@sante.gouv.fr par héritage de phileas.condemine@gmail.com
+         "distriPensions",#drees-github-snds@sante.gouv.fr
+         "Care-M",#DREES-CARE@sante.gouv.fr
+         "condition_de_vie_des_enfants",#DREES-ENQUETES-FAMILLE@sante.gouv.fr
+         "dico-snds", #ld-lab-github@sante.gouv.fr
+         "landing_page",#drees-bads@sante.gouv.fr
+         "demographie_ps")#cf BPS
 
 
 dyCrosshair <- function(dygraph, 
